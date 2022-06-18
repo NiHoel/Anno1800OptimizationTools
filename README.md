@@ -40,6 +40,25 @@ Maximizes the total number of residents by finding the best arrangement of Level
 
 
 
+## Depots
+Place as many depots as possible in the harbour area
+
+![depots](imgs/depots.png)
+
+### Prerequisits
+| :exclamation:  Requires an expensive commercial software to run. Please contact me, if you want to use it.   |
+|----------------------------------------------------------------------------------|
+* No user interface, but simple click-and-run if you follow the instructions in the Jupyter Notebook
+
+
+
+## Arbitrage
+Calculate how many residents you can supply by exploiting docklands
+
+### Prerequisits
+* Uses the free built-in solver (no commercial one needed)
+* Basic coding skills to add and remove comments
+
 
 
 ## Troubleshooting
