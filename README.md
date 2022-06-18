@@ -1,34 +1,34 @@
 # Anno 1800 Optimization Tools
-Push Anno 1800 to its limits by finding the best possible solution to a problem. Applies to skyscraper residents, depots, and docklands trade.
-Read the requisits of each tool!
+Push Anno 1800 to its limits by finding the best possible solution to a problem - applies to skyscraper residents, depots, and docklands trade.
+Read the prerequisites of each tool!
 
 
 ## Skyscraper Levels
-Maximizes the total number of residents by finding the best arrangement of Level 4 and Level 5 skyscrapers to exploit the panorama effect to its maximum.
+Maximizes the total number of residents by finding the best arrangement of Level 4 and Level 5 skyscrapers to maximize the panorama effect.
 
 ![Manually adjusted skyscraper levels](imgs/skyscrapers_manual.png) ![optimized skyscraper levels by the tool](imgs/skyscrapers_optimal.png)
 
 (Left: manually adjusted skyscraper levels; right: optimized levels by the tool)
 
-### Prerequisits
-| :exclamation:  Requires an expensive commercial software to run. Please contact me, if you want to use it.   |
+### Prerequisites
+| :exclamation:  Requires expensive commercial software to run. Please get in touch with me if you want to use it.   |
 |----------------------------------------------------------------------------------|
-* Has an intuitive user interface
+* It has an intuitive user interface
 
 ![ui](imgs/skyscraper_levels_ui.png)
 
 ### Getting Started
-1. Export the island as a Anno Designer Layout: https://github.com/NiHoel/Anno1800SavegameVisualizer
+1. Export the island as an Anno Designer Layout: https://github.com/NiHoel/Anno1800SavegameVisualizer
    * It is recommended to enable `Residents` and `Equipped Items` under the `Labels` tab before exporting
-2. Install `Gurobi Optimizer` and enter license key: https://www.gurobi.com/downloads/
+2. Install `Gurobi Optimizer` and enter the license key: https://www.gurobi.com/downloads/
 3. Download the latest release of this repository: https://github.com/nihoel/Anno1800OptimizationTools/releases/latest
 4. Extract the archive to some directory on your computer.
 5. Double click on skyscraper_level.ipynb (must open in Jupyter Lab).
 6. The two images at the top of the software show which buttons you need to click to run the software.
 
 ### Advanced
-* The needs tab specifies all goods you supply. Fullfillment by items is handled by selecting the corresponding item.
-* Increase the time limit to gain better results (however, experience on large islands shows that improvements after one hour are marginal and after 6 hours no improvement occurs)
+* The needs tab specifies all goods you supply. Fulfilment by items is handled by selecting the corresponding item.
+* Increase the time limit to gain better results (however, experience on large islands shows that improvements after one hour are marginal, and after 6 hours, no improvement occurs)
 * There are two ways to specify the equipped items:
     * Identical items in all townhalls: Use the checkboxes in the `Items` tab
     * Different items in townhalls: 
@@ -36,7 +36,7 @@ Maximizes the total number of residents by finding the best arrangement of Level
         2. Export the island with selected `Equipped Items` under the `Labels` tab
         3. Select `Use item list stored in townhall label` under the `General` tab
 * `Enforce full supply`: Use this option to prevent skyscrapers from becoming level 5 skyscrapers if the drug store need is not fulfilled.
-* If the island consists of multiple disconnected residence areas (e.g. islands on Crown Falls), the tool will do one run per area (with a lower time limit). Cutting the problem into smaller pieces yields better results than doing one big run. One can add more cuts to make it even better manageable (and obtain better results): Use the Anno Designer to mark a corridor that splits the island into two parts. To mark a residence as being part of the corridor, label it with '-' (hint: you need to delete the existing building and place a new one with the label '-'). It is recommended that the corridor is approximately 6 residences broad.
+* If the island consists of multiple disconnected residence areas (e.g. islands on Crown Falls), the tool does one run per area (with a lower time limit). Cutting the problem into smaller pieces yields better results than doing one big run. One can add more cuts to make it more manageable (and obtain better results): Use the Anno Designer to mark a corridor that splits the island into two parts. To mark a residence as part of the corridor, label it with '-' (hint: you need to delete the existing building and place a new one with the label '-'). It is recommended that the corridor is approximately 6 residences broad.
 
 
 
@@ -45,17 +45,17 @@ Place as many depots as possible in the harbour area
 
 ![depots](imgs/depots.png)
 
-### Prerequisits
-| :exclamation:  Requires an expensive commercial software to run. Please contact me, if you want to use it.   |
+### Prerequisites
+| :exclamation:  Requires expensive commercial software to run. Please get in touch with me if you want to use it.   |
 |----------------------------------------------------------------------------------|
-* No user interface, but simple click-and-run if you follow the instructions in the Jupyter Notebook
+* No user interface but simple click-and-run if you follow the instructions in the Jupyter Notebook
 
 
 
 ## Arbitrage
 Calculate how many residents you can supply by exploiting docklands
 
-### Prerequisits
+### Prerequisites
 * Uses the free built-in solver (no commercial one needed)
 * Basic coding skills to add and remove comments
 
