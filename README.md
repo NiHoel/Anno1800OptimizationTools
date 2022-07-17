@@ -11,8 +11,6 @@ Maximizes the total number of residents by finding the best arrangement of Level
 (Left: manually adjusted skyscraper levels; right: optimized levels by the tool)
 
 ### Prerequisites
-| :exclamation:  Requires expensive commercial software to run. Please get in touch with me if you want to use it.   |
-|----------------------------------------------------------------------------------|
 * It has an intuitive user interface
 
 ![ui](imgs/skyscraper_levels_ui.png)
@@ -91,4 +89,5 @@ The software is provided without warranty of any kind. The work was NOT endorsed
 
 
 ## License
-[MIT](https://github.com/AnnoDesigner/anno-designer/blob/master/LICENSE)
+* [MIT](https://github.com/AnnoDesigner/anno-designer/blob/master/LICENSE) for the Python (*.py) and Jupyter Notebook (*.ipynb) files
+* [ZIB ACADEMIC LICENSE] (https://scipopt.org/academic.txt) for the [SCIP Optimization Suite](https://scipopt.org/index.php) (compiled binaries in tools). The license enforces certain conditions for redistribution. Source code: https://scipopt.org/download.php?fname=scipoptsuite-8.0.1.tgz
