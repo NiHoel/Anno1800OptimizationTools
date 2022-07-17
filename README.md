@@ -1,12 +1,11 @@
 # Anno 1800 Optimization Tools
 Push Anno 1800 to its limits by finding the best possible solution to a problem - applies to skyscraper residents, depots, and docklands trade.
-Read the prerequisites of each tool!
 
 
 ## Skyscraper Levels
 Maximizes the total number of residents by finding the best arrangement of Level 4 and Level 5 skyscrapers to maximize the panorama effect.
 
-![Manually adjusted skyscraper levels](imgs/skyscrapers_manual.png) ![optimized skyscraper levels by the tool](imgs/skyscrapers_optimal.png)
+![Manually adjusted skyscraper levels](imgs/skyscrapers_manual.png) ![Optimized skyscraper levels by the tool](imgs/skyscrapers_optimal.png)
 
 (Left: manually adjusted skyscraper levels; right: optimized levels by the tool)
 
@@ -18,7 +17,7 @@ Maximizes the total number of residents by finding the best arrangement of Level
 1. Export the island as an Anno Designer Layout: https://github.com/NiHoel/Anno1800SavegameVisualizer
    * It is recommended to enable `Residents` and `Equipped Items` under the `Labels` tab before exporting
 2. Download the latest release of this repository: https://github.com/nihoel/Anno1800OptimizationTools/releases/latest
-3. Extract the archive to some directory on your computer.
+3. Extract the archive.
 4. Double click on skyscraper_level.ipynb (must open in Jupyter Lab).
 5. The two images at the top of the software show which buttons you need to click to run the software.
 
@@ -29,11 +28,19 @@ Maximizes the total number of residents by finding the best arrangement of Level
     * Identical items in all townhalls: Use the checkboxes in the `Items` tab
     * Different items in townhalls: 
         1. Equip the items in the game
-        2. Export the island with selected `Equipped Items` under the `Labels` tab
-        3. Select `Use item list stored in townhall label` under the `General` tab
+        2. Export the island with selected `Equipped Items` under the `Labels` tab (savegame visualizer)
+        3. Select `Use item list stored in townhall label` under the `General` tab (skyscraper levels)
 * `Enforce full supply`: Use this option to prevent skyscrapers from becoming level 5 skyscrapers if the drug store need is not fulfilled.
 * If the island consists of multiple disconnected residence areas (e.g. islands on Crown Falls), the tool does one run per area (with a lower time limit). Cutting the problem into smaller pieces yields better results than doing one big run. One can add more cuts to make it more manageable (and obtain better results): Use the Anno Designer to mark a corridor that splits the island into two parts. To mark a residence as part of the corridor, label it with '-' (hint: you need to delete the existing building and place a new one with the label '-'). It is recommended that the corridor is approximately 6 residences broad.
 
+### Comparison
+You have built an island in Anno in accordance to a reference file and you want to check that levels and panorama effects are correct?
+1. Use the Savegame visualizer to export the island. Check `Residents` under the `Labels` tab.
+2. Load both files in `comparison.ipynb` and click `Save Diff`
+3. Yellow residences have fewer residents than the reference file proposes, blue ones more. Note: Residences can have panorama effects that are higher or lower than they should be. Downgrade and upgrade the building to correct it.
+
+
+![Comparison](imgs/comparison.png)
 
 ## Depots
 Place as many depots as possible in the harbour area
@@ -44,9 +51,7 @@ Place as many depots as possible in the harbour area
 ## Arbitrage
 Calculate how many residents you can supply by exploiting docklands
 
-### Prerequisites
-* Uses the free built-in solver (no commercial one needed)
-* Basic coding skills to add and remove comments
+* Requires basic coding skills to add and remove comments
 
 
 
@@ -82,4 +87,4 @@ The software is provided without warranty of any kind. The work was NOT endorsed
 
 ## License
 * [MIT](https://github.com/AnnoDesigner/anno-designer/blob/master/LICENSE) for the Python (*.py) and Jupyter Notebook (*.ipynb) files
-* [ZIB ACADEMIC LICENSE] (https://scipopt.org/academic.txt) for the [SCIP Optimization Suite](https://scipopt.org/index.php) (compiled binaries in tools). The license enforces certain conditions for redistribution. Source code: https://scipopt.org/download.php?fname=scipoptsuite-8.0.1.tgz
+* [ZIB ACADEMIC LICENSE](https://scipopt.org/academic.txt) for the [SCIP Optimization Suite](https://scipopt.org/index.php) (compiled binaries in tools). The license enforces certain conditions for redistribution. Source code: https://scipopt.org/download.php?fname=scipoptsuite-8.0.1.tgz
