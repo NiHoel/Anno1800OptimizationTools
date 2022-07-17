@@ -37,17 +37,10 @@ Maximizes the total number of residents by finding the best arrangement of Level
 * If the island consists of multiple disconnected residence areas (e.g. islands on Crown Falls), the tool does one run per area (with a lower time limit). Cutting the problem into smaller pieces yields better results than doing one big run. One can add more cuts to make it more manageable (and obtain better results): Use the Anno Designer to mark a corridor that splits the island into two parts. To mark a residence as part of the corridor, label it with '-' (hint: you need to delete the existing building and place a new one with the label '-'). It is recommended that the corridor is approximately 6 residences broad.
 
 
-
 ## Depots
 Place as many depots as possible in the harbour area
 
 ![depots](imgs/depots.png)
-
-### Prerequisites
-| :exclamation:  Requires expensive commercial software to run. Please get in touch with me if you want to use it.   |
-|----------------------------------------------------------------------------------|
-* No user interface but simple click-and-run if you follow the instructions in the Jupyter Notebook
-
 
 
 ## Arbitrage
@@ -82,6 +75,7 @@ Contact me if you fail to understand or resolve the error displayed there. To he
 * Join the Annoverse discord: https://discord.gg/V4xhZ8Z
 * Ask questions or give feedback in the #user-tools channel or write me a message (user: DuxVitae#7882)
 * I welcome any kind of feedback: Bugs, user experience improvements, feature suggestions.
+* If you are student or staff of an academic institution, you get free access to commercial solvers. If you want to solve problems faster (and get better results) contact me. 
 
 
 ## Disclaimer
