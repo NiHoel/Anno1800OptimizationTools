@@ -10,19 +10,17 @@ Maximizes the total number of residents by finding the best arrangement of Level
 
 (Left: manually adjusted skyscraper levels; right: optimized levels by the tool)
 
-### Prerequisites
-* It has an intuitive user interface
+
 
 ![ui](imgs/skyscraper_levels_ui.png)
 
 ### Getting Started
 1. Export the island as an Anno Designer Layout: https://github.com/NiHoel/Anno1800SavegameVisualizer
    * It is recommended to enable `Residents` and `Equipped Items` under the `Labels` tab before exporting
-2. Install `Gurobi Optimizer` and enter the license key: https://www.gurobi.com/downloads/
-3. Download the latest release of this repository: https://github.com/nihoel/Anno1800OptimizationTools/releases/latest
-4. Extract the archive to some directory on your computer.
-5. Double click on skyscraper_level.ipynb (must open in Jupyter Lab).
-6. The two images at the top of the software show which buttons you need to click to run the software.
+2. Download the latest release of this repository: https://github.com/nihoel/Anno1800OptimizationTools/releases/latest
+3. Extract the archive to some directory on your computer.
+4. Double click on skyscraper_level.ipynb (must open in Jupyter Lab).
+5. The two images at the top of the software show which buttons you need to click to run the software.
 
 ### Advanced
 * The needs tab specifies all goods you supply. Fulfilment by items is handled by selecting the corresponding item.
