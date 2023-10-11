@@ -31,6 +31,7 @@ Maximizes the total number of residents by finding the best arrangement of Level
         2. Export the island with selected `Equipped Items` under the `Labels` tab (savegame visualizer)
         3. Select `Use item list stored in townhall label` under the `General` tab (skyscraper levels)
 * `Enforce full supply`: Use this option to prevent skyscrapers from becoming level 5 skyscrapers if the drug store need is not fulfilled.
+* If you want to optimize for level 3 engineers and investors, at least 20% of the residences in the layout must be engineer residences (or skyscrapers). The optimizer then chooses a different mode where it first improves the distribution of level 3 skyscrapers and then places some level 5 investor skyscrapers. After loading the file, the status bar shows which mode is picked.
 * If the island consists of multiple disconnected residence areas (e.g. islands on Crown Falls), the tool does one run per area (with a lower time limit). Cutting the problem into smaller pieces yields better results than doing one big run. One can add more cuts to make it more manageable (and obtain better results): Use the Anno Designer to mark a corridor that splits the island into two parts. To mark a residence as part of the corridor, label it with '-' (hint: you need to delete the existing building and place a new one with the label '-'). It is recommended that the corridor is approximately 6 residences broad.
 
 ### Comparison
