@@ -1,4 +1,5 @@
-       
+TAG = "v2.0"
+
 import numpy as np
 
 from collections import deque
@@ -1991,6 +1992,7 @@ class House :
         self.ID = ID
         self.needs = [dict(), dict()]
         self.var_levels = None
+        self.is_fixed = False
         
         self.tl = tl
         if self.tl is None :
@@ -2033,12 +2035,13 @@ class House :
     
     def init_levels(self):
         self.var_levels = [[LpVariable("HL_{}_{}_{}".format(self.ID, r, l.level), cat='Binary') for l in A7PARAMS["levels"][r]] for r in [0,1]]
+        self.is_fixed = False
     
     def dist(self, h) :
         return np.linalg.norm(self.center - h.center)
     
     def is_gap(self) :
-        return not "Label" in self.obj and self.obj["Label"] == "-"
+        return "Label" in self.obj and self.obj["Label"] == "-"
     
     def calculate_unbound_panorama(self, level = None, residence = None) :
         if residence is None:
@@ -2128,6 +2131,9 @@ class House :
         return profit
     
     def fix_level(self, level, residence) :
+        if self.is_fixed:
+            return
+    
         self.level = level
         self.residence = residence
         for r in [0,1]:
@@ -2138,6 +2144,8 @@ class House :
                 else:
                     self.var_levels[r][l].setInitialValue(0)
                     self.var_levels[r][l].fixValue()
+                    
+        self.is_fixed = True
         
     def gen_object(self, colors=None) : 
         l = A7PARAMS["levels"][self.residence][self.level - 1]
@@ -2335,7 +2343,7 @@ class Layout :
         if obj.get("Identifier") == "Scholar_Residence" :
             return False
         
-        return "residence" in obj["Identifier"].lower() or "skyscraper" in obj["Template"].lower() or obj.get("Icon") == "A7_resident"
+        return "residence" in obj["Identifier"].lower() or "skyscraper" in obj["Template"].lower() or obj.get("Icon") == "A7_resident" or obj.get("Icon") == "A7_dlc_high_life_256"
     
     def is_street(self, obj):
         return obj.get("Road")
@@ -3472,11 +3480,6 @@ class OptimizerGUI:
                         self.logs = []
                         self.btn_terminate.description = _("Terminate") if count >= len(layout.clusters) else _("Next run")
 
-                        for h in layout.houses :
-                            h.init_levels()
-                            if not h in c and not h in layout.cluster_gaps :
-                                h.fix_level(h.level, h.residence)
-
                         time_limit = None
                         if total_time is not None:
                             time_limit = max(120, int(total_time * len(c) / len(layout.houses)))
@@ -3493,6 +3496,11 @@ class OptimizerGUI:
                         houses = c if len(layout.cluster_gaps) == 0 else None
                         
                         self.lp = LPLevels(layout, houses = houses,  full_supply = ("full_supply" in options["general"]))
+                        
+                        for h in layout.houses :
+                            if not h in c and not h in layout.cluster_gaps :
+                                h.fix_level(h.level, h.residence)
+                        
                         self.lp.optimize(time_limit = time_limit, log_path = self.log_path, log_callback = callback)
 
                         if self.lp.status != constants.LpSolutionOptimal and self.lp.status != constants.LpSolutionIntegerFeasible:
