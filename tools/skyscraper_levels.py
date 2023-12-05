@@ -1,4 +1,4 @@
-TAG = "v2.1"
+TAG = "v2.2"
 
 import numpy as np
 
@@ -25,13 +25,14 @@ one = np.array([1,1])
 from pulp import *
 available_solvers = listSolvers(onlyAvailable=True)
 
-if "GUROBI_CMD" in available_solvers :
-    from gurobipy import GRB
-    SOLVER = "GUROBI"
-elif "CPLEX_PY" in available_solvers :
-    import cplex
-    SOLVER = "CPLEX"
-else :
+#if "GUROBI_CMD" in available_solvers :
+#    from gurobipy import GRB
+#    SOLVER = "GUROBI"
+#elif "CPLEX_PY" in available_solvers :
+#    import cplex
+#    SOLVER = "CPLEX"
+#else :
+if True:
     from tools.fscip_api import FSCIP_CMD
     from subprocess import Popen, PIPE, STDOUT
     SOLVER = "FSCIP" 
@@ -2136,6 +2137,7 @@ class House :
     
         self.level = level
         self.residence = residence
+        print(self.ID, level, residence)
         for r in [0,1]:
             for l in range(len( A7PARAMS["levels"][r])):
                 if l == level - 1 and r == residence:
@@ -2660,11 +2662,13 @@ class Layout :
         iteration = 0
 
         while True:
+            print(iteration)
             maximum = float('-inf')
             maximizer = 0
             has_elements = False
             for i in range(len(queues)) :
                 while not queues[i].empty() and queues[i].queue[0][1].queue_index > i :
+                    print("get queue", i)
                     queues[i].get()
 
                 if queues[i].empty() :
@@ -2690,6 +2694,9 @@ class Layout :
 
             to = get_upgrade(h)
             if to is None:
+                iteration += 1
+                if iteration > len(self.houses):
+                    break
                 continue
 
             if h.get_profit(to[0], to[1], False) < 0 :
@@ -2728,6 +2735,7 @@ class Layout :
             if iteration > len(self.houses):
                 break
 
+        print("update panorama")
         self.update_panorama()        
       
 class Watcher:
