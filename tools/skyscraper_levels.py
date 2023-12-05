@@ -2723,7 +2723,8 @@ class Layout :
 
             iteration += 1
             if iteration % 10 == 0 and callback is not None:
-                callback(self.get_residents())
+                if callback(self.get_residents()):
+                    break
             if iteration > len(self.houses):
                 break
 
@@ -3093,6 +3094,7 @@ class OptimizerGUI:
         self.layout = None
         self.log_path = None
         self.lp = None
+        self.terminate = False
 
         self.groups = []
 
@@ -3156,6 +3158,7 @@ class OptimizerGUI:
             self.optimize()
             
         def callback_terminate(btn):
+            self.terminate = True
             if self.lp is not None:
                 self.lp.terminate()
 
@@ -3468,10 +3471,14 @@ class OptimizerGUI:
                     self.set_status(_("Optimizing ..."))
                     options = self.get_options()
                     
+                    skipped_cluster = False
+                    
                     if layout.engineer_mode and not ("skip_heuristic" in options["general"]):
                         print("run heuristic")
                         def cb(residents):
                             lbl_incumbent.value = "{:,.0f}".format(residents)
+                            return self.terminate
+                            
                         layout.run_heuristic([0,3], [1,3], True, cb)
                         cb(self.layout.get_residents())
                     
@@ -3479,6 +3486,7 @@ class OptimizerGUI:
                     for c in layout.clusters :
                         self.logs = []
                         self.btn_terminate.description = _("Terminate") if count >= len(layout.clusters) else _("Next run")
+                        self.terminate = False
 
                         time_limit = None
                         if total_time is not None:
@@ -3492,34 +3500,51 @@ class OptimizerGUI:
                         lbl_incumbent.value = "-"
                         lbl_bound.value = "-"
                         lbl_improvement.value = "-"
-
-                        houses = c if len(layout.cluster_gaps) == 0 else None
+                        
+                        only_cluster = (len(layout.cluster_gaps) == 0)
+                        houses = c if only_cluster else None
                         
                         self.lp = LPLevels(layout, houses = houses,  full_supply = ("full_supply" in options["general"]))
                         
-                        for h in layout.houses :
-                            if not h in c and not h in layout.cluster_gaps :
-                                h.fix_level(h.level, h.residence)
+                        if not only_cluster:
+                            for h in layout.houses :
+                                if not h in c and not h in layout.cluster_gaps :
+                                    h.fix_level(h.level, h.residence)
                         
-                        self.lp.optimize(time_limit = time_limit, log_path = self.log_path, log_callback = callback)
-
-                        if self.lp.status != constants.LpSolutionOptimal and self.lp.status != constants.LpSolutionIntegerFeasible:
-                            self.set_status(_("No solution found"))
-                       
+                        try:
+                            #in rare occations with few houses, FSCIP finds a solution but generates an empty solution file
+                            self.lp.optimize(time_limit = time_limit, log_path = self.log_path, log_callback = callback)
+                            
+                            if self.lp.status != constants.LpSolutionOptimal and self.lp.status != constants.LpSolutionIntegerFeasible:
+                                self.set_status(_("No solution found"))
+                        except Exception as e:
+                            print(e)
+                            skipped_cluster = True                     
                         
                         count += 1
                     
+                   
+                    if skipped_cluster:                            
+                        def cb(residents):
+                            lbl_incumbent.value = "{:,.0f}".format(residents)
+                            return self.terminate
+                        
+                        if layout.engineer_mode:
+                            layout.run_heuristic([1,3], [1,5], True, cb)
+                        else:
+                            layout.run_heuristic([1,4], [1,5], True, cb)
+                        cb(self.layout.get_residents())  
+                    else:
+                        if self.lp.status != constants.LpSolutionOptimal and self.lp.status != constants.LpSolutionIntegerFeasible:
+                            self.set_status(_("No solution found"))
+                            show(self.btn_optimize)
+                            return
+
+                        self.set_status(_("Solution found"))
+
                     hide(self.btn_terminate)
                     hide(self.grid_stats)  
                     self.btn_file_chooser.disabled = False
-                    
-                    if self.lp.status != constants.LpSolutionOptimal and self.lp.status != constants.LpSolutionIntegerFeasible:
-                        self.set_status(_("No solution found"))
-                        show(self.btn_optimize)
-                        return
-
-                    self.set_status(_("Solution found"))
-                    print(value(self.lp.prob.objective))
 
                     out_path = os.getcwd() + "\\" + pathlib.Path(self.get_file_name()).stem + "_opt.ad"
                     options = self.get_options()
