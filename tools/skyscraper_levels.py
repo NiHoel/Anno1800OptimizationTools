@@ -43,7 +43,34 @@ i18n = {
     "Optimize": {
           "german": "Optimiere"
     },
-
+    "Engineers": {
+            "chinese": "工程师",
+            "english": "Engineers",
+            "french": "Ingénieurs",
+            "german": "Ingenieure",
+            #"guid": 15000003,
+            "italian": "Ingegneri",
+            "japanese": "技師",
+            "korean": "기술자",
+            "polish": "Inżynierowie",
+            "russian": "Инженеры",
+            "spanish": "Ingenieros",
+            "taiwanese": "工程師"
+    },
+    "Investors": {
+            "chinese": "投资人",
+            "english": "Investors",
+            "french": "Investisseurs",
+            "german": "Investoren",
+            #"guid": 15000004,
+            "italian": "Investitori",
+            "japanese": "投資家",
+            "korean": "투자가",
+            "polish": "Inwestorzy",
+            "russian": "Инвесторы",
+            "spanish": "Inversores",
+            "taiwanese": "投資人"
+    },
     "Needs": {
             "chinese": "需求",
             "english": "Needs",
@@ -2341,7 +2368,7 @@ class Layout :
         if obj.get("Identifier") is None or obj.get("Template") is None:
             return False
         
-        if obj.get("Identifier") == "Scholar_Residence" :
+        if obj.get("Identifier") == "Scholar_Residence" or obj.get("Identifier") == "Legend":
             return False
         
         return "residence" in obj["Identifier"].lower() or "skyscraper" in obj["Template"].lower() or obj.get("Icon") == "A7_resident" or obj.get("Icon") == "A7_dlc_high_life_256"
