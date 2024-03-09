@@ -1,4 +1,4 @@
-TAG = "v2.2"
+TAG = "v2.3"
 
 import numpy as np
 
