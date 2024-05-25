@@ -1,4 +1,4 @@
-TAG = "v2.3"
+TAG = "v2.4"
 
 import numpy as np
 
@@ -24,6 +24,7 @@ one = np.array([1,1])
 
 from pulp import *
 available_solvers = listSolvers(onlyAvailable=True)
+#available_solvers = []
 
 if "GUROBI_CMD" in available_solvers :
     from gurobipy import GRB
@@ -32,8 +33,7 @@ elif "CPLEX_PY" in available_solvers :
     import cplex
     SOLVER = "CPLEX"
 else :
-    from tools.fscip_api import FSCIP_CMD
-    from subprocess import Popen, PIPE, STDOUT
+    from tools.fscip_api import FSCIP_CMD_INTERACTIVE
     SOLVER = "FSCIP" 
 
 i18n = {
@@ -2781,7 +2781,7 @@ if SOLVER == "GUROBI":
 
         def __init__(self, prob, timeLimit, logPath):
             self.prob = prob
-            self.solver = GUROBI(msg=False, timeLimit = timeLimit, logPath = logPath, warmStart = True, options=[('MIPConcurrent',4)])
+            self.solver = GUROBI(msg=False, timeLimit = timeLimit, logPath = logPath, warmStart = True)
 
         def terminate(self):
             GurobiWatcher.stop = True
@@ -2804,8 +2804,7 @@ if SOLVER == "GUROBI":
                         objbnd = model.cbGet(GRB.Callback.MIP_OBJBND)
                         log_callback(runtime, objbst, objbnd)
 
-            self.solver.buildSolverModel(self.prob)
-            self.solver.callSolver(self.prob, callback=callback)
+            self.solver.actualSolve(self.prob, callback=callback)
             return self.extract_solution(self.prob)
 
         def extract_solution(self, lp):
@@ -2919,7 +2918,7 @@ if SOLVER == "FSCIP":
     class FscipWatcher(Watcher): 
         def __init__(self, prob, timeLimit, logPath):
             self.prob = prob
-            self.solver = FSCIP_CMD(msg=False, timeLimit = timeLimit, logPath = logPath, warmStart=False, path=os.getcwd() + "/tools/fscip.exe")
+            self.solver = FSCIP_CMD_INTERACTIVE(msg=False, timeLimit = timeLimit, logPath = logPath, path=os.getcwd() + "/tools/fscip.exe")
 
         def terminate(self):
             self.solver.terminate()      

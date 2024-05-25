@@ -1,23 +1,25 @@
 from pulp import *
-import copy
+import io
 from subprocess import Popen, PIPE, STDOUT
 
-class FSCIP_CMD(LpSolver_CMD):
-    """The FSCIP optimization solver"""
+class FSCIP_CMD_INTERACTIVE(FSCIP_CMD):
+    """Interactive specialization with callback and termination method of the FSCIP optimization solver"""
     
-    name="FSCIP_CMD"
+    name="FSCIP_CMD_INTERACTIVE"
     
     def __init__(
         self,
         path=None,
-        keepFiles=False,
         mip=True,
+        keepFiles=False,
         msg=True,
         options=None,
         timeLimit=None,
-        warmStart=False,
-        threads=0,
-        logPath=None
+        gapRel=None,
+        gapAbs=None,
+        maxNodes=None,
+        threads=None,
+        logPath=None,
     ):
         """
         :param bool mip: if False, assume LP even if integer variables
@@ -30,7 +32,7 @@ class FSCIP_CMD(LpSolver_CMD):
         :param int threads: sets the maximum number of threads
         :param str logPath: path to the log file
         """
-        LpSolver_CMD.__init__(
+        FSCIP_CMD.__init__(
             self,
             mip=mip,
             msg=msg,
@@ -38,21 +40,15 @@ class FSCIP_CMD(LpSolver_CMD):
             path=path,
             keepFiles=keepFiles,
             timeLimit=timeLimit,
-            warmStart=warmStart,
-            logPath=logPath
+            gapRel=gapRel,
+            gapAbs=gapAbs,
+            maxNodes=maxNodes,
+            threads=threads,
+            logPath=logPath,
         )
-        self.threads = threads
-        self.logPath = logPath
-        self.warmStart = warmStart
-        self.process = None
-     
-    def defaultPath(self):
-        return self.executableExtension("fscip.exe")
 
-    def available(self):
-        """True if the solver is available"""
-        return self.executable(self.path)
-    
+        self.process = None
+
     def terminate(self):
         if self.process is not None:
             self.process.terminate()
@@ -62,31 +58,67 @@ class FSCIP_CMD(LpSolver_CMD):
         if not self.executable(self.path):
             raise PulpSolverError("PuLP: cannot execute " + self.path)
 
-        tmpLp, tmpSol, tmpMst, tmpPrm = self.create_tmp_files(lp.name, "lp", "sol", "mst", "prm")
-        vs = lp.writeLP(tmpLp, writeSOS=1)
+        tmpLp, tmpSol, tmpOptions, tmpParams = self.create_tmp_files(
+            lp.name, "lp", "sol", "set", "prm"
+        )
+        lp.writeLP(tmpLp)
 
-        options = copy.deepcopy(self.options)
-        if options is None:
-            options = []
+        file_options: List[str] = []
+        if "gapRel" in self.optionsDict:
+            file_options.append(f"limits/gap={self.optionsDict['gapRel']}")
+        if "gapAbs" in self.optionsDict:
+            file_options.append(f"limits/absgap={self.optionsDict['gapAbs']}")
+        if "maxNodes" in self.optionsDict:
+            file_options.append(f"limits/nodes={self.optionsDict['maxNodes']}")
+        if not self.mip:
+            warnings.warn(f"{self.name} does not allow a problem to be relaxed")
+
+        file_parameters: List[str] = []
         if self.timeLimit is not None:
-            options.append(["TimeLimit", str(self.timeLimit)])
-        with open(tmpPrm, "w") as f:
-            f.write("\n".join(["%s = %s" % (key, value) for key, value in options]))
-            f.close()
-        
-        proc = ["%s" % self.path, tmpPrm, tmpLp]
-        proc.extend(["-sth", str(self.threads)])
+            file_parameters.append(f"TimeLimit = {self.timeLimit}")
+        # disable presolving in the LoadCoordinator to make sure a solution file is always written
+        file_parameters.append("NoPreprocessingInLC = TRUE")
 
-        if self.logPath is not None:
-            proc.extend(["-l", str(self.logPath)])
-        proc.extend(["-fsol", str(tmpSol)])
-        if self.warmStart == True:
-            self.writesol(filename=tmpMst, vs=vs)
-            proc.extend(["-isol", str(tmpMst)])     
-
+        command: List[str] = []
+        command.append(self.path)
+        command.append(tmpParams)
+        command.append(tmpLp)
+        command.extend(["-s", tmpOptions])
+        command.extend(["-fsol", tmpSol])
         if not self.msg:
-            proc.append("-q")
+            command.append("-q")
+        if "logPath" in self.optionsDict:
+            command.extend(["-l", self.optionsDict["logPath"]])
+        if "threads" in self.optionsDict:
+            command.extend(["-sth", f"{self.optionsDict['threads']}"])
 
+        options = iter(self.options)
+        for option in options:
+            # identify cli options by a leading dash (-) and treat other options as file options
+            if option.startswith("-"):
+                # assumption: all cli options require an argument which is provided as a separate parameter
+                argument = next(options)
+                command.extend([option, argument])
+            else:
+                # assumption: all file options contain a slash (/)
+                is_file_options = "/" in option
+
+                # assumption: all file options and parameters require an argument which is provided after the equal sign (=)
+                if "=" not in option:
+                    argument = next(options)
+                    option += f"={argument}"
+
+                if is_file_options:
+                    file_options.append(option)
+                else:
+                    file_parameters.append(option)
+
+        # wipe the solution file since FSCIP does not overwrite it if no solution was found which causes parsing errors
+        self.silent_remove(tmpSol)
+        with open(tmpOptions, "w") as options_file:
+            options_file.write("\n".join(file_options))
+        with open(tmpParams, "w") as parameters_file:
+            parameters_file.write("\n".join(file_parameters))
         
         if outputHandler is None:
             stdout = self.firstWithFilenoSupport(sys.stdout, sys.__stdout__)
@@ -95,21 +127,17 @@ class FSCIP_CMD(LpSolver_CMD):
             
         stderr = self.firstWithFilenoSupport(sys.stderr, sys.__stderr__)
 
-        self.solution_time = -clock()
-        self.process = Popen(proc, stdout=stdout, stderr=stderr)
+        self.process = Popen(command, stdout=stdout, stderr=stderr)
         if outputHandler is not None:
             for line in self.process.stdout:
                 outputHandler(line)
         exitcode = self.process.wait()
-        self.solution_time += clock()
-        
+
         self.process = None
 
         if not os.path.exists(tmpSol):
             raise PulpSolverError("PuLP: Error while executing " + self.path)
-
         status, values = self.readsol(tmpSol)
-
         # Make sure to add back in any 0-valued variables SCIP leaves out.
         finalVals = {}
         for v in lp.variables():
@@ -117,42 +145,8 @@ class FSCIP_CMD(LpSolver_CMD):
 
         lp.assignVarsVals(finalVals)
         lp.assignStatus(status)
-        self.delete_tmp_files(tmpLp, tmpSol,tmpMst,tmpPrm)
+        self.delete_tmp_files(tmpLp, tmpSol, tmpOptions, tmpParams)
         return status
-    
-    @staticmethod
-    def readsol(filename):
-        """Read a SCIP solution file"""
-        with open(filename) as f:
-
-            # Ignore first line it is different from scip sol file
-            try:
-                line = f.readline()
-            except Exception:
-                raise PulpSolverError("Can't get SCIP solver status")
-
-            status = constants.LpStatusOptimal
-            values = {}
-
-            # Look for an objective value. If we can't find one, stop.
-            try:
-                line = f.readline()
-                comps = line.split(": ")
-                assert comps[0] == "objective value"
-                assert len(comps) == 2
-                float(comps[1].strip())
-            except Exception:
-                raise PulpSolverError("Can't get SCIP solver objective: %r" % line)
-
-            # Parse the variable values.
-            for line in f:
-                try:
-                    comps = line.split()
-                    values[comps[0]] = float(comps[1])
-                except:
-                    raise PulpSolverError("Can't read SCIP solver output: %r" % line)
-
-            return status, values
     
     @staticmethod
     def firstWithFilenoSupport(*streams):
